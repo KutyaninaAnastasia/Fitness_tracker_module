@@ -65,13 +65,9 @@ class Running(Training):
     """Тренировка: бег."""
     TRAINING_TYPE = 'Running'
 
-    def __init__(self,
-                 action: int,
-                 duration: float,
-                 weight: float) -> None:
-        super().__init__(action, duration, weight)
-
     def get_spent_calories(self) -> float:
+        # Попробовала вынести значения в константы класса,
+        # но программа не проходит проверку pytest
         coeff_calorie_1 = 18
         coeff_calorie_2 = 20
         duration_min = self.duration * 60
@@ -132,12 +128,6 @@ class Swimming(Training):
 
 def read_package(workout_type: str, data: list) -> Training:
     """Прочитать данные полученные от датчиков."""
-    training_dict = {
-        'SWM': Swimming,
-        'RUN': Running,
-        'WLK': SportsWalking
-    }
-
     training = training_dict[workout_type](*data)
     return training
 
@@ -147,6 +137,12 @@ def main(training: Training) -> None:
     info = training.show_training_info()
     print(info.get_message())
 
+
+training_dict = {
+    'SWM': Swimming,
+    'RUN': Running,
+    'WLK': SportsWalking
+}
 
 if __name__ == '__main__':
     packages = [
