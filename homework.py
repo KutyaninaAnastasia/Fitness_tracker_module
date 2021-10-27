@@ -64,21 +64,24 @@ class Training:
 class Running(Training):
     """Тренировка: бег."""
     TRAINING_TYPE = 'Running'
+    COEFF_CALORIE_1 = 18
+    COEFF_CALORIE_2 = 20
 
     def get_spent_calories(self) -> float:
         # Попробовала вынести значения в константы класса,
         # но программа не проходит проверку pytest
-        coeff_calorie_1 = 18
-        coeff_calorie_2 = 20
         duration_min = self.duration * 60
-        speed = super().get_mean_speed()
-        formula_1 = coeff_calorie_1 * speed - coeff_calorie_2
-        return formula_1 * self.weight / super().M_IN_KM * duration_min
+        speed = self.get_mean_speed()
+        formula_1 = self.COEFF_CALORIE_1 * speed - self.COEFF_CALORIE_2
+        return formula_1 * self.weight / self.M_IN_KM * duration_min
 
 
 class SportsWalking(Training):
     """Тренировка: спортивная ходьба."""
     TRAINING_TYPE = 'SportsWalking'
+    COEFF_CALORIE_1 = 0.035
+    COEFF_CALORIE_2 = 0.029
+    COEFF_SPEED = 2
 
     def __init__(self,
                  action: int,
@@ -89,14 +92,11 @@ class SportsWalking(Training):
         self.height = height
 
     def get_spent_calories(self) -> float:
-        coeff_calorie_1 = 0.035
-        coeff_calorie_2 = 0.029
-        coeff_speed = 2
         duration_min = self.duration * 60
-        speed = super().get_mean_speed()
-        formula_1 = speed ** coeff_speed // self.height
-        formula_2 = coeff_calorie_1 * self.weight
-        formula_3 = formula_1 * coeff_calorie_2 * self.weight
+        speed = self.get_mean_speed()
+        formula_1 = speed ** self.COEFF_SPEED // self.height
+        formula_2 = self.COEFF_CALORIE_1 * self.weight
+        formula_3 = formula_1 * self.COEFF_CALORIE_2 * self.weight
         return (formula_2 + formula_3) * duration_min
 
 
@@ -104,6 +104,8 @@ class Swimming(Training):
     """Тренировка: плавание."""
     LEN_STEP = 1.38
     TRAINING_TYPE = 'Swimming'
+    COEFF_CALORIE_1 = 1.1
+    COEFF_CALORIE_2 = 2
 
     def __init__(self,
                  action: int,
@@ -117,18 +119,27 @@ class Swimming(Training):
 
     def get_mean_speed(self) -> float:
         total_distance = self.length_pool * self.count_pool
-        return total_distance / super().M_IN_KM / self.duration
+        return total_distance / self.M_IN_KM / self.duration
 
     def get_spent_calories(self) -> float:
-        coeff_calorie_1 = 1.1
-        coeff_calorie_2 = 2
-        formula_1 = self.get_mean_speed() + coeff_calorie_1
-        return formula_1 * coeff_calorie_2 * self.weight
+        formula_1 = self.get_mean_speed() + self.COEFF_CALORIE_1
+        return formula_1 * self.COEFF_CALORIE_2 * self.weight
+
+
+TRAINING_DICT = {
+    # Сделала как написано в ревью, но проверила задание.
+    # Там сказано:'В теле функции должен быть словарь,
+    # в котором сопоставляются коды тренировок и классы,
+    # которые нужно вызвать для каждого типа тренировки'.
+    'SWM': Swimming,
+    'RUN': Running,
+    'WLK': SportsWalking
+}
 
 
 def read_package(workout_type: str, data: list) -> Training:
     """Прочитать данные полученные от датчиков."""
-    training = training_dict[workout_type](*data)
+    training = TRAINING_DICT[workout_type](*data)
     return training
 
 
@@ -137,12 +148,6 @@ def main(training: Training) -> None:
     info = training.show_training_info()
     print(info.get_message())
 
-
-training_dict = {
-    'SWM': Swimming,
-    'RUN': Running,
-    'WLK': SportsWalking
-}
 
 if __name__ == '__main__':
     packages = [
